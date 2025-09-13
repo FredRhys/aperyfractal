@@ -7,6 +7,10 @@ CFLAGS = -std=c11\
 		 -fsanitize=undefined\
 		 -fsanitize=address
 
+.PHONY: main
+main:
+	$(LD) $(CFLAGS) -o main main.c -lmpfr -lgmp
+
 .PHONY: mpfr_version
 mpfr_version:
 	$(LD) $(CFLAGS) -o mpfr_version mpfr_version.c -lmpfr -lgmp
