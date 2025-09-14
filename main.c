@@ -13,6 +13,18 @@ int str_to_int(char *str) {
   return (int) strtol(str, 0, 10);
 }
 
+void mpfr_init_lists(int width, int prec, mpfr_t a[width], mpfr_t b[width], mpfr_t lcm[width]) {
+  for (int i = 0; i < width; i++) {
+    mpfr_inits2(prec, a[i], b[i], lcm[i], mpfr_null);
+  }
+}
+
+void mpfr_clear_lists(int width, mpfr_t a[width], mpfr_t b[width], mpfr_t lcm[width]) {
+  for (int i = 0; i < width; i++) {
+    mpfr_clears(a[i], b[i], lcm[i], mpfr_null);
+  }
+}
+
 void delta(mpfr_t a1, mpfr_t a0, mpfr_t b1, mpfr_t b0) {
 
 }
@@ -29,20 +41,24 @@ void mpfr_rec(int n, mpfr_t u2, mpfr_t u1, mpfr_t u0, mpfr_t h) {
   mpfr_div_d(u2, u2, (int)pow(n+1, 3), R);
 }
 
-void mpfr_lcm(mpfr_t lcm2, mpfr_t lcm1, int n) {
+void mpfr_gcd(int prec, mpfr_t rop, mpfr_t a, int b, mpfr_t h) {
+  mpfr_t p, q; //variables for storing the values of a and b as modifiable values.
+  mpfr_inits2(prec, p, q, mpfr_null);
+  mpfr_set(p, a, R);
+  mpfr_set_si(q, b, R);
 
+  while (!mpfr_zero_p(h)) {
+    mpfr_set(h, q, R);
+    mpfr_fmod(q, p, q, R);
+    mpfr_set(p, h, R);
+  }
+  mpfr_set(rop, p, R);
+  mpfr_clears(p, q, mpfr_null);
 }
 
-void mpfr_init_lists(int width, int prec, mpfr_t a[width], mpfr_t b[width], mpfr_t lcm[width]) {
-  for (int i = 0; i < width; i++) {
-    mpfr_inits2(prec, a[i], b[i], lcm[i], mpfr_null);
-  }
-}
+void mpfr_lcm(mpfr_t lcm2, mpfr_t lcm1, int n, mpfr_t h) {
 
-void mpfr_clear_lists(int width, mpfr_t a[width], mpfr_t b[width], mpfr_t lcm[width]) {
-  for (int i = 0; i < width; i++) {
-    mpfr_clears(a[i], b[i], lcm[i], mpfr_null);
-  }
+
 }
 
 void mpfr_set_initial_vals(int width, mpfr_t a[width], mpfr_t b[width], mpfr_t lcm[width]) {
@@ -58,7 +74,7 @@ void mpfr_fill_seqs(int width, mpfr_t a[width], mpfr_t b[width], mpfr_t lcm[widt
   for (int i = 1; i < width - 1; i++) {
     mpfr_rec(i, a[i+1], a[i], a[i-1], h);
     mpfr_rec(i, b[i+1], b[i], b[i-1], h);
-    mpfr_lcm(lcm[i+1], lcm[i], i);
+    mpfr_lcm(lcm[i+1], lcm[i], i, h);
   }
 }
 
