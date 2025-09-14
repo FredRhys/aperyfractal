@@ -41,9 +41,7 @@ void mpfr_rec(int n, mpfr_t u2, mpfr_t u1, mpfr_t u0, mpfr_t h) {
   mpfr_div_d(u2, u2, (int)pow(n+1, 3), R);
 }
 
-void mpfr_gcd(int prec, mpfr_t rop, mpfr_t a, int b, mpfr_t h1) {
-  mpfr_t h2; //second helper variable
-  mpfr_init2(h2, prec);
+void mpfr_gcd(mpfr_t rop, mpfr_t a, int b, mpfr_t h1, mpfr_t h2) {
   mpfr_set(rop, a, R);
   mpfr_set_si(h2, b, R);
 
@@ -52,12 +50,12 @@ void mpfr_gcd(int prec, mpfr_t rop, mpfr_t a, int b, mpfr_t h1) {
     mpfr_fmod(h2, rop, h1, R); // b <- a % b
     mpfr_set(rop, h1, R); // a <- t
   }
-  mpfr_clear(h2);
 }
 
-void mpfr_lcm(mpfr_t lcm2, mpfr_t lcm1, int n, mpfr_t h) {
-
-
+void mpfr_lcm(mpfr_t lcm2, mpfr_t lcm1, int n, mpfr_t h1, mpfr_t h2, mpfr_t h3) {
+  mpfr_mul_si(lcm2, lcm1, n + 1, R);
+  mpfr_gcd(h1, lcm1, n, h2, h3);
+  mpfr_div(lcm2, lcm2, h1, R);
 }
 
 void mpfr_set_initial_vals(int width, mpfr_t a[width], mpfr_t b[width], mpfr_t lcm[width]) {
@@ -69,28 +67,29 @@ void mpfr_set_initial_vals(int width, mpfr_t a[width], mpfr_t b[width], mpfr_t l
   mpfr_set_si(lcm[1], 1, R);
 }
 
-void mpfr_fill_seqs(int width, mpfr_t a[width], mpfr_t b[width], mpfr_t lcm[width], mpfr_t h) {
+void mpfr_fill_seqs(int width, mpfr_t a[width], mpfr_t b[width], mpfr_t lcm[width],
+  mpfr_t h1, mpfr_t h2, mpfr_t h3) {
   for (int i = 1; i < width - 1; i++) {
-    mpfr_rec(i, a[i+1], a[i], a[i-1], h);
-    mpfr_rec(i, b[i+1], b[i], b[i-1], h);
-    mpfr_lcm(lcm[i+1], lcm[i], i, h);
+    mpfr_rec(i, a[i+1], a[i], a[i-1], h1);
+    mpfr_rec(i, b[i+1], b[i], b[i-1], h1);
+    mpfr_lcm(lcm[i+1], lcm[i], i, h1, h2, h3);
   }
 }
 
 int mainloop(int width, int prec) {
   // MPFR variables storing the sequences in Apery's sequences
   // h is a helper variable
-  mpfr_t a[width], b[width], lcm[width], h;
+  mpfr_t a[width], b[width], lcm[width], h1, h2, h3;
 
   // Initialize all the above with `prec` bits of precision
   mpfr_init_lists(width, prec, a, b, lcm);
-  mpfr_init2(h, prec);
+  mpfr_inits2(prec, h1, h2, h3, mpfr_null);
 
   // set the initial values for the sequences
   mpfr_set_initial_vals(width, a, b, lcm);
 
   // fill the sequences
-  mpfr_fill_seqs(width, a, b, lcm, h);
+  mpfr_fill_seqs(width, a, b, lcm, h1, h2, h3);
 
   // the mainloop
   for (int i = 0; i < width; i++) {
@@ -101,7 +100,7 @@ int mainloop(int width, int prec) {
 
   //clear the memory used by MPFR
   mpfr_clear_lists(width, a, b, lcm);
-  mpfr_clear(h);
+  mpfr_clears(h1, h2, h3, mpfr_null);
   mpfr_free_cache();
   return 0;
 }
