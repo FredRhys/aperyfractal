@@ -9,7 +9,7 @@ CFLAGS = -std=c11\
 
 .PHONY: main
 main:
-	$(LD) $(CFLAGS) -o main main.c -lmpfr -lgmp
+	$(LD) $(CFLAGS) -o main main.c -lmpfr -lgmp -lm
 
 .PHONY: mpfr_version
 mpfr_version:
