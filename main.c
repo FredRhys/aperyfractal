@@ -25,8 +25,15 @@ void mpfr_clear_lists(int width, mpfr_t a[width], mpfr_t b[width], mpfr_t lcm[wi
   }
 }
 
-void delta(mpfr_t a1, mpfr_t a0, mpfr_t b1, mpfr_t b0) {
-
+void delta(mpfr_t rop, mpfr_t a1, mpfr_t a0, mpfr_t b1, mpfr_t b0, mpfr_t lcm1, mpfr_t lcm0,
+  mpfr_t h1, mpfr_t h2, mpfr_t h3) {
+  mpfr_pow_si(h1, lcm1, 3, R);
+  mpfr_mul_si(h1, h1, 2, R);
+  mpfr_pow_si(h2, lcm0, 3, R);
+  mpfr_mul_si(h2, h2, 2, R);
+  mpfr_fmms(rop, h1, a1, h2, a0, R);
+  mpfr_fmms(h3, h1, b1, h2, b0, R);
+  mpfr_div(rop, rop, h3, R);
 }
 
 int P(int n) {
@@ -78,29 +85,33 @@ void mpfr_fill_seqs(int width, mpfr_t a[width], mpfr_t b[width], mpfr_t lcm[widt
 
 int mainloop(int width, int prec) {
   // MPFR variables storing the sequences in Apery's sequences
-  // h is a helper variable
-  mpfr_t a[width], b[width], lcm[width], h1, h2, h3;
+  // h's are helper variable, z3 stores Apery's constant
+  mpfr_t a[width], b[width], lcm[width], h1, h2, h3, delta_res, z3;
 
   // Initialize all the above with `prec` bits of precision
   mpfr_init_lists(width, prec, a, b, lcm);
-  mpfr_inits2(prec, h1, h2, h3, mpfr_null);
+  mpfr_inits2(prec, h1, h2, h3, delta_res, z3, mpfr_null);
 
   // set the initial values for the sequences
   mpfr_set_initial_vals(width, a, b, lcm);
+  mpfr_zeta_ui(z3, 3, R);
 
   // fill the sequences
   mpfr_fill_seqs(width, a, b, lcm, h1, h2, h3);
 
   // the mainloop
-  for (int i = 0; i < width; i++) {
-    mpfr_printf("%.16Rf\n", lcm[i]);
-    for (int j = i+1; j <= width; j++) {      
+  for (int i = 0; i < width - 1; i++) {
+    for (int j = i+1; j <= width -1; j++) {   
+      delta(delta_res, a[j], a[i], b[j], b[i], lcm[j], lcm[i], h1, h2, h3);
+      if (mpfr_cmp(delta_res, z3)) {
+        printf("%d, %d\n", i, j);
+      }
     }
   }
 
   //clear the memory used by MPFR
   mpfr_clear_lists(width, a, b, lcm);
-  mpfr_clears(h1, h2, h3, mpfr_null);
+  mpfr_clears(h1, h2, h3, delta_res, z3, mpfr_null);
   mpfr_free_cache();
   return 0;
 }
