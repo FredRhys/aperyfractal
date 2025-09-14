@@ -41,19 +41,18 @@ void mpfr_rec(int n, mpfr_t u2, mpfr_t u1, mpfr_t u0, mpfr_t h) {
   mpfr_div_d(u2, u2, (int)pow(n+1, 3), R);
 }
 
-void mpfr_gcd(int prec, mpfr_t rop, mpfr_t a, int b, mpfr_t h) {
-  mpfr_t p, q; //variables for storing the values of a and b as modifiable values.
-  mpfr_inits2(prec, p, q, mpfr_null);
-  mpfr_set(p, a, R);
-  mpfr_set_si(q, b, R);
+void mpfr_gcd(int prec, mpfr_t rop, mpfr_t a, int b, mpfr_t h1) {
+  mpfr_t h2; //second helper variable
+  mpfr_init2(h2, prec);
+  mpfr_set(rop, a, R);
+  mpfr_set_si(h2, b, R);
 
-  while (!mpfr_zero_p(h)) {
-    mpfr_set(h, q, R);
-    mpfr_fmod(q, p, q, R);
-    mpfr_set(p, h, R);
+  while (!mpfr_zero_p(h2)) {
+    mpfr_set(h1, h2, R); // t <- b
+    mpfr_fmod(h2, rop, h1, R); // b <- a % b
+    mpfr_set(rop, h1, R); // a <- t
   }
-  mpfr_set(rop, p, R);
-  mpfr_clears(p, q, mpfr_null);
+  mpfr_clear(h2);
 }
 
 void mpfr_lcm(mpfr_t lcm2, mpfr_t lcm1, int n, mpfr_t h) {
@@ -64,9 +63,9 @@ void mpfr_lcm(mpfr_t lcm2, mpfr_t lcm1, int n, mpfr_t h) {
 void mpfr_set_initial_vals(int width, mpfr_t a[width], mpfr_t b[width], mpfr_t lcm[width]) {
   // based off previous calculations
   mpfr_set_si(a[0], 0, R);
-  mpfr_set_si(a[1], 5, R);
+  mpfr_set_si(a[1], 6, R);
   mpfr_set_si(b[0], 1, R);
-  mpfr_set_si(b[1], 6, R);
+  mpfr_set_si(b[1], 5, R);
   mpfr_set_si(lcm[1], 1, R);
 }
 
