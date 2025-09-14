@@ -16,17 +16,12 @@ void delta(mpfr_t a1, mpfr_t a0, mpfr_t b1, mpfr_t b0) {
 
 }
 
-void mpfr_rec(mpfr_t rop, mpfr_t u2, mpfr_t u1, mpfr_t u0) {
+void mpfr_rec(mpfr_t rop, mpfr_t u1, mpfr_t u0) {
 
 }
 
-void mpfr_inc_seq(mpfr_t u2, mpfr_t u1, mpfr_t u0) {
-  // move up u1 and u0 in the sequence
-  mpfr_set(u0, u1, R);
-  mpfr_set(u1, u2, R);
+void mpfr_lcm(mpfr_t rop, mpfr_t lcm1, int n) {
 
-  // calculate the next term in the sequence and assign it to u2
-  mpfr_rec(u2, u2, u1, u0);
 }
 
 void mpfr_init_lists(int width, int prec, mpfr_t a[width], mpfr_t b[width], mpfr_t lcm[width]) {
@@ -41,6 +36,23 @@ void mpfr_clear_lists(int width, int prec, mpfr_t a[width], mpfr_t b[width], mpf
   }
 }
 
+void mpfr_set_initial_vals(int width, mpfr_t a[width], mpfr_t b[width], mpfr_t lcm[width]) {
+  // based off previous calculations
+  mpfr_set_si(a[0], 0, R);
+  mpfr_set_si(a[1], 5, R);
+  mpfr_set_si(b[0], 1, R);
+  mpfr_set_si(b[1], 6, R);
+  mpfr_set_si(lcm[1], 1, R);
+}
+
+void mpfr_fill_seqs(int width, mpfr_t a[width], mpfr_t b[width], mpfr_t lcm[width]) {
+  for (int i = 2; i < width; i++) {
+    mpfr_rec(a[i+1], a[i], a[i-1]);
+    mpfr_rec(b[i+1], b[i], b[i-1]);
+    mpfr_lcm(lcm[i+1], lcm[i], i);
+  }
+}
+
 int mainloop(int width, int prec) {
   // MPFR variables storing the sequences in Apery's sequences
   mpfr_t a[width], b[width], lcm[width];
@@ -49,17 +61,14 @@ int mainloop(int width, int prec) {
   mpfr_init_lists(width, prec, a, b, lcm);
 
   // set the initial values for the sequences
-  mpfr_set_si(a[0], 0, R);
-  mpfr_set_si(a[1], 5, R);
-  mpfr_set_si(b[0], 1, R);
-  mpfr_set_si(b[1], 6, R);
-  mpfr_set_si(lcm[1], 1, R);
+  mpfr_set_initial_vals(width, a, b, lcm);
+
+  // fill the sequences
+  mpfr_fill_seqs(width, a, b, lcm);
 
   // the mainloop
   for (int i = 0; i <= width; i++) {
-    for (int j = i+1; j <= width; j++) {
-      // calculate the next terms in the sequences
-      
+    for (int j = i+1; j <= width; j++) {      
     }
   }
 
