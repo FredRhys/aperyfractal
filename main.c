@@ -7,8 +7,6 @@
 #define R MPFR_RNDN
 // used as null pointer by the program; used to terminate lists of MPFR variables in variadic functions
 #define mpfr_null (mpfr_ptr) 0
-// used as null pointer by the program; used to terminate lists of GMP variables in variadic functions
-#define mpfr_null (mpz_ptr) 0
 
 int str_to_int(char *str) {
   return (int) strtol(str, 0, 10);
@@ -16,12 +14,13 @@ int str_to_int(char *str) {
 
 int mainloop(int width, int prec) {
   // MPFR variables storing the three terms in Apery's `a` sequence.
-  // a2 is a_n
-  // a1 is a_{n-1}
-  // a0 is a_{n-2}
-  mpfr_t a0, a1, a2;
-  mpfr_inits2(prec, a0, a1, a2, mpfr_null);
-  mpfr_clears(a0, a1, a2, mpfr_null);
+  // a2 is a_{n+1}
+  // a1 is a_n
+  // a0 is a_{n-1}
+  // Likewise for the b variables.
+  mpfr_t a0, a1, a2, b0, b1, b2;
+  mpfr_inits2(prec, a0, a1, a2, b0, b1, b2, mpfr_null);
+  mpfr_clears(a0, a1, a2, b0, b1, b2, mpfr_null);
   return 0;
 }
 
