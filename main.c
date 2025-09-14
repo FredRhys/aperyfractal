@@ -47,14 +47,14 @@ void mpfr_gcd(mpfr_t rop, mpfr_t a, int b, mpfr_t h1, mpfr_t h2) {
 
   while (!mpfr_zero_p(h2)) {
     mpfr_set(h1, h2, R); // t <- b
-    mpfr_fmod(h2, rop, h1, R); // b <- a % b
+    mpfr_fmod(h2, rop, h2, R); // b <- a % b
     mpfr_set(rop, h1, R); // a <- t
   }
 }
 
-void mpfr_lcm(mpfr_t lcm2, mpfr_t lcm1, int n, mpfr_t h1, mpfr_t h2, mpfr_t h3) {
+void mpfr_lcm(int n, mpfr_t lcm2, mpfr_t lcm1, mpfr_t h1, mpfr_t h2, mpfr_t h3) {
   mpfr_mul_si(lcm2, lcm1, n + 1, R);
-  mpfr_gcd(h1, lcm1, n, h2, h3);
+  mpfr_gcd(h1, lcm1, n + 1, h2, h3);
   mpfr_div(lcm2, lcm2, h1, R);
 }
 
@@ -72,7 +72,7 @@ void mpfr_fill_seqs(int width, mpfr_t a[width], mpfr_t b[width], mpfr_t lcm[widt
   for (int i = 1; i < width - 1; i++) {
     mpfr_rec(i, a[i+1], a[i], a[i-1], h1);
     mpfr_rec(i, b[i+1], b[i], b[i-1], h1);
-    mpfr_lcm(lcm[i+1], lcm[i], i, h1, h2, h3);
+    mpfr_lcm(i, lcm[i+1], lcm[i], h1, h2, h3);
   }
 }
 
@@ -93,7 +93,7 @@ int mainloop(int width, int prec) {
 
   // the mainloop
   for (int i = 0; i < width; i++) {
-    mpfr_printf("%.16Rf\n", b[i]);
+    mpfr_printf("%.16Rf\n", lcm[i]);
     for (int j = i+1; j <= width; j++) {      
     }
   }
