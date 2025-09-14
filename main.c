@@ -103,7 +103,7 @@ int mainloop(int width, int prec) {
   for (int i = 0; i < width - 1; i++) {
     for (int j = i+1; j <= width -1; j++) {   
       delta(delta_res, a[j], a[i], b[j], b[i], lcm[j], lcm[i], h1, h2, h3);
-      if (mpfr_cmp(delta_res, z3)) {
+      if (mpfr_cmp(delta_res, z3) < 0) {
         printf("%d, %d\n", i, j);
       }
     }
