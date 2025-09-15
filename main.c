@@ -90,6 +90,7 @@ int mainloop(int width, int prec) {
 
   FILE *fpt;
 	fpt = fopen("output.csv", "w");
+	fprintf(fpt, "x,y\n");
 
   // Initialize all the above with `prec` bits of precision
   mpfr_init_lists(width, prec, a, b, lcm);
