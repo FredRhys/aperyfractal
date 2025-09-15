@@ -36,16 +36,37 @@ void delta(mpfr_t rop, mpfr_t a1, mpfr_t a0, mpfr_t b1, mpfr_t b0, mpfr_t lcm1, 
   mpfr_div(rop, rop, h3, R);
 }
 
-int P(int n) {
-  return 34 * pow(n, 3) + 51 * pow(n, 2) + 27 * n + 5;
+void P(mpfr_t rop, int n, mpfr_t h) {
+  mpfr_set_si(rop, n, R);
+  mpfr_pow_si(rop, rop, 3, R);
+  mpfr_mul_si(rop, rop, 34, R);
+
+  mpfr_set_si(h, n, R);
+  mpfr_sqr(h, h, R);
+  mpfr_mul_si(h, h, 51, R);
+
+  mpfr_add(rop, rop, h, R);
+
+  mpfr_set_si(h, n, R);
+  mpfr_mul_si(h, h, 27, R);
+
+  mpfr_add(rop, rop, h, R);
+  mpfr_add_si(rop, rop, 5, R);
 }
 
 // sets rop to (P(n) * u1 - n^3 * u0)/ (n+1)^3
-void mpfr_rec(int n, mpfr_t u2, mpfr_t u1, mpfr_t u0, mpfr_t h) {
-  mpfr_mul_si(u2, u1, P(n), R);
-  mpfr_mul_si(h, u0, (int)pow(n, 3), R);
-  mpfr_sub(u2, u2, h, R);
-  mpfr_div_d(u2, u2, (int)pow(n+1, 3), R);
+void mpfr_rec(int n, mpfr_t u2, mpfr_t u1, mpfr_t u0, mpfr_t h1, mpfr_t h2) {
+  P(h2, n, h1);
+  mpfr_mul(u2, u1, h2, R);
+  
+  mpfr_set_si(h2, n, R);
+  mpfr_pow_si(h2, h2, 3, R);
+  mpfr_mul(h1, u0, h2, R);
+  mpfr_sub(u2, u2, h1, R);
+
+  mpfr_set_si(h2, n+1, R);
+  mpfr_pow_si(h2, h2, 3, R);
+  mpfr_div(u2, u2, h2, R);
 }
 
 void mpfr_gcd(mpfr_t rop, mpfr_t a, int b, mpfr_t h1, mpfr_t h2) {
@@ -77,8 +98,8 @@ void mpfr_set_initial_vals(int width, mpfr_t a[width], mpfr_t b[width], mpfr_t l
 void mpfr_fill_seqs(int width, mpfr_t a[width], mpfr_t b[width], mpfr_t lcm[width],
   mpfr_t h1, mpfr_t h2, mpfr_t h3) {
   for (int i = 1; i < width - 1; i++) {
-    mpfr_rec(i, a[i+1], a[i], a[i-1], h1);
-    mpfr_rec(i, b[i+1], b[i], b[i-1], h1);
+    mpfr_rec(i, a[i+1], a[i], a[i-1], h1, h2);
+    mpfr_rec(i, b[i+1], b[i], b[i-1], h1, h2);
     mpfr_lcm(i, lcm[i+1], lcm[i], h1, h2, h3);
   }
 }
