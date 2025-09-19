@@ -9,6 +9,45 @@
 // used as null pointer by the program; used to terminate lists of MPFR variables in variadic functions
 #define mpfr_null (mpfr_ptr) 0
 
+void nCr(mpfr_t rop, int n, int r) {
+  const int k = r < n - r ? n - r + 1 : r + 1;
+  mpfr_set_si(rop, 1, R);
+  for (int i = n; i >= k; i--) {
+    mpfr_mul_si(rop, rop, i, R);
+    mpfr_div_si(rop, rop, i - n + 1, R);
+  }
+}
+
+void binom_sum(mpfr_t rop, int n, int m, mpfr_t h) {
+  nCr(rop, n, m);
+  nCr(h, n + m, m);
+  mpfr_add(rop, rop, h, R);
+}
+
+void binom_sum_sq(mpfr_t rop, int n, int m, mpfr_t h) {
+  binom_sum(rop, n, m, h);
+  mpfr_sqr(rop, rop, R);
+}
+
+void apery_aux(mpfr_t rop, int n, int k, mpfr_t h1, mpfr_t h2, mpfr_t h3) {
+  mpfr_set_zero(rop, 0);
+  for (int l = 1; l <= n; l++) {
+    mpfr_set_si(h1, l, R);
+    mpfr_pow_si(h1, h1, -3, R);
+    mpfr_add(rop, rop, h1, R);
+  }
+  for (int m = 1; 1 <= k; m++) {
+    mpfr_set_si(h1, m % 2 == 0 ? -1 : 1, R);
+    binom_sum(h2, n, m, h3);
+    mpfr_set_si(h3, m, R);
+    mpfr_pow_si(h3, h3, 3, R);
+    mpfr_mul(h2, h2, h3, R);
+    mpfr_mul_si(h2, h2, 2, R);
+    mpfr_div(h1, h1, h2, R);
+  }
+  mpfr_add(rop, rop, h1, R);
+}
+
 int str_to_int(char *str) {
   return (int) strtol(str, 0, 10);
 }
