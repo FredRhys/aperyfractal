@@ -202,7 +202,6 @@ int mainloop(int width, int prec) {
   // set the initial values for the sequences
   mpfr_set_initial_vals(0, width, a, b, lcm, h1, h2, h3, h4, h5);
   mpfr_zeta_ui(z3, 3, R);
-  mpfr_printf("%.0Rf/%.0Rf/%.0Rf/%.0Rf\n", a[0], a[1], b[0], b[1]);
 
   // fill the sequences
   mpfr_fill_seqs(1, width, a, b, lcm, h1, h2, h3);
@@ -211,16 +210,15 @@ int mainloop(int width, int prec) {
   for (int i = 0; i < width - 1; i++) {
     for (int j = i+1; j <= width -1; j++) {
       delta(delta_res, a[j], a[i], b[j], b[i], lcm[j], lcm[i], h1, h2, h3);
-      /*
-      if (mpfr_cmp(delta_res, z3) == 0) {
-        prec = prec * 2;
+      /*if (mpfr_cmp(delta_res, z3) == 0) {
+        prec *= 2;
         set_list_precs(i < j ? i : j, width, prec, a, b, lcm, h1, h2, h3, h4, h5, delta_res, z3, 1);
         mpfr_set_initial_vals(i < j ? i : j, width, a, b, lcm, h1, h2, h3, h4, h5);
         mpfr_zeta_ui(z3, 3, R);
         mpfr_fill_seqs(i < j ? i : j, width, a, b, lcm, h1, h2, h3);
+        j -= 1;
       }
-      */
-      if (mpfr_cmp(delta_res, z3) < 0) {
+      else */if (mpfr_cmp(delta_res, z3) < 0) {
 				fprintf(fpt, "%d,%d\n", i, j);
       }
     }
