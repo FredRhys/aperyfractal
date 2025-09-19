@@ -210,10 +210,36 @@ void save_point(FILE *fpt, int linelen, int width, int i, int j) {
 }
 
 int has_l_adj_p(FILE *fpt, int linelen, int x, int y) {
-  fseek(fpt, -linelen-2, SEEK_END);
+  int mult = 1;
   char line[linelen+2];
-  fgets(line, linelen+2, fpt);
-  printf("%s\n", line);
+  int fx = x, fy = y, xdone;
+  while (fx >= x || fy >= y) {
+    fseek(fpt, (mult++) * (-linelen - 2), SEEK_END);
+    fgets(line, linelen+2, fpt);
+    fx = 0;
+    fy = 0;
+    xdone = 0;
+
+    // read the string as two integers, x & y
+    for (int i = 0; line[i] != '\0'; i++) {
+      if (line[i] == ',') {
+        xdone = 1;
+      }
+      else {
+        if (xdone == 0) {
+          fx = fx * 10 + line[i] - '0';
+        }
+        else {
+          fy = fy * 10 + line[i] - '0';
+        }
+      }
+    }
+    //check if (fx,fy) is left-adjacent to (x,y)
+    if ((fx == x - 1 && fy == y) || (fx == x - 1 && fy == y - 1)) {
+      fseek(fpt, 0, SEEK_END);
+      return 1;
+    }
+  }
   fseek(fpt, 0, SEEK_END); //resets pointer
   return 0;
 }
@@ -234,6 +260,7 @@ int mainloop(int width, int prec) {
 
   // the mainloop
   for (int i = 0; i < width - 1; i++) {
+    vcounter = 0;
     for (int j = i + 1; j <= width - 1; j++) {
       delta(delta_res, a[j], a[i], b[j], b[i], lcm[j], lcm[i], h1, h2, h3);
       if (mpfr_equal_p(delta_res, z3)) {
@@ -242,10 +269,11 @@ int mainloop(int width, int prec) {
         j--;
         //checks also if there is a point to the immediate left, or left-and-down-one
       }
+
       if (mpfr_cmp(delta_res, z3) < 0) {
         if (vcounter == 1) {
-          if (has_l_adj_p(fpt, linelen, i, j)) {
-            
+          if (!has_l_adj_p(fpt, linelen, i, j)) {
+            printf("%d, %d\n", i, j);
           }
         }
         save_point(fpt, linelen, width, i, j);
