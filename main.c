@@ -254,7 +254,7 @@ int mainloop(int width, int prec) {
 
   FILE *fpt;
 	fpt = fopen("output.csv", "w+");
-	fprintf(fpt, "%*.*sx,y\n", 0, linelen - 2, "00000000000000000000000000000");
+	fprintf(fpt, "x,y\n");
   setup(0, width, prec, a, b, lcm, h1, h2, h3, h4, h5, delta_res, z3, 1);
   
 
