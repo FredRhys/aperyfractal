@@ -21,7 +21,7 @@ void nCr(mpfr_t rop, int n, int r) {
 void binom_sum(mpfr_t rop, int n, int m, mpfr_t h) {
   nCr(rop, n, m);
   nCr(h, n + m, m);
-  mpfr_add(rop, rop, h, R);
+  mpfr_mul(rop, rop, h, R);
 }
 
 void binom_sum_sq(mpfr_t rop, int n, int m, mpfr_t h) {
@@ -31,12 +31,14 @@ void binom_sum_sq(mpfr_t rop, int n, int m, mpfr_t h) {
 
 void apery_aux(mpfr_t rop, int n, int k, mpfr_t h1, mpfr_t h2, mpfr_t h3) {
   mpfr_set_zero(rop, 0);
+  mpfr_set_zero(h1, 0);
   for (int l = 1; l <= n; l++) {
     mpfr_set_si(h1, l, R);
     mpfr_pow_si(h1, h1, -3, R);
     mpfr_add(rop, rop, h1, R);
-  }
-  for (int m = 1; 1 <= k; m++) {
+  } //1
+  mpfr_set_zero(h1, 0);
+  for (int m = 1; m <= k; m++) {
     mpfr_set_si(h1, m % 2 == 0 ? -1 : 1, R);
     binom_sum(h2, n, m, h3);
     mpfr_set_si(h3, m, R);
@@ -46,6 +48,7 @@ void apery_aux(mpfr_t rop, int n, int k, mpfr_t h1, mpfr_t h2, mpfr_t h3) {
     mpfr_div(h1, h1, h2, R);
   }
   mpfr_add(rop, rop, h1, R);
+  mpfr_printf("%.4Rf\n", rop);
 }
 
 void dir_a(mpfr_t rop, int n, mpfr_t h1, mpfr_t h2, mpfr_t h3, mpfr_t h4, mpfr_t h5) {
@@ -56,6 +59,7 @@ void dir_a(mpfr_t rop, int n, mpfr_t h1, mpfr_t h2, mpfr_t h3, mpfr_t h4, mpfr_t
     mpfr_mul(h1, h1, h2, R);
     mpfr_add(rop, rop, h1, R);
   }
+  putchar('\n');
 }
 
 void dir_b(mpfr_t rop, int n, mpfr_t h1, mpfr_t h2) {
@@ -149,12 +153,12 @@ void mpfr_lcm(int n, mpfr_t lcm2, mpfr_t lcm1, mpfr_t h1, mpfr_t h2, mpfr_t h3) 
   mpfr_div(lcm2, lcm2, h1, R);
 }
 
-void mpfr_set_initial_vals(int start, int width, mpfr_t a[width], mpfr_t b[width], mpfr_t lcm[width]) {
+void mpfr_set_initial_vals(int start, int width, mpfr_t a[width], mpfr_t b[width], mpfr_t lcm[width], mpfr_t h1, mpfr_t h2, mpfr_t h3, mpfr_t h4, mpfr_t h5) {
   // based off previous calculations
-  mpfr_set_si(a[start], 0, R);
-  mpfr_set_si(a[start + 1], 6, R);
-  mpfr_set_si(b[start], 1, R);
-  mpfr_set_si(b[start + 1], 5, R);
+  dir_a(a[start], start, h1, h2, h3, h4, h5);
+  dir_a(a[start + 1], start + 1, h1, h2, h3, h4, h5);
+  dir_b(b[start], start, h1, h2);
+  dir_b(b[start + 1], start + 1, h1, h2);
   mpfr_set_si(lcm[1], 1, R);
 }
 
@@ -162,7 +166,7 @@ void set_list_precs(int start, int width, int prec, mpfr_t a[width], mpfr_t b[wi
 mpfr_t h1, mpfr_t h2, mpfr_t h3, mpfr_t h4, mpfr_t h5, mpfr_t delta_res, mpfr_t z3, int init) {
   mpfr_init_lists(start, width, prec, a, b, lcm, init); //start only matters if init==1
   if (init) {
-    mpfr_inits2(prec, h1, h2, h3, delta_res, z3, mpfr_null);
+    mpfr_inits2(prec, h1, h2, h3, h4, h5, delta_res, z3, mpfr_null);
   } else {
     mpfr_set_prec(h1, prec);
     mpfr_set_prec(h2, prec);
@@ -185,7 +189,7 @@ void mpfr_fill_seqs(int start, int width, mpfr_t a[width], mpfr_t b[width], mpfr
 
 int mainloop(int width, int prec) {
   // MPFR variables storing the sequences in Apery's sequences
-  // h's are helper variable, z3 stores Apery's constant
+  // h's are helper variables, z3 stores Apery's constant
   mpfr_t a[width], b[width], lcm[width], h1, h2, h3, h4, h5, delta_res, z3;
 
   FILE *fpt;
@@ -196,8 +200,9 @@ int mainloop(int width, int prec) {
   set_list_precs(0, width, prec, a, b, lcm, h1, h2, h3, h4, h5, delta_res, z3, 1);
 
   // set the initial values for the sequences
-  mpfr_set_initial_vals(0, width, a, b, lcm);
+  mpfr_set_initial_vals(0, width, a, b, lcm, h1, h2, h3, h4, h5);
   mpfr_zeta_ui(z3, 3, R);
+  mpfr_printf("%.0Rf/%.0Rf/%.0Rf/%.0Rf\n", a[0], a[1], b[0], b[1]);
 
   // fill the sequences
   mpfr_fill_seqs(1, width, a, b, lcm, h1, h2, h3);
@@ -206,13 +211,15 @@ int mainloop(int width, int prec) {
   for (int i = 0; i < width - 1; i++) {
     for (int j = i+1; j <= width -1; j++) {
       delta(delta_res, a[j], a[i], b[j], b[i], lcm[j], lcm[i], h1, h2, h3);
+      /*
       if (mpfr_cmp(delta_res, z3) == 0) {
         prec = prec * 2;
         set_list_precs(i < j ? i : j, width, prec, a, b, lcm, h1, h2, h3, h4, h5, delta_res, z3, 1);
-        mpfr_set_initial_vals(i < j ? i : j, width, a, b, lcm);
+        mpfr_set_initial_vals(i < j ? i : j, width, a, b, lcm, h1, h2, h3, h4, h5);
         mpfr_zeta_ui(z3, 3, R);
         mpfr_fill_seqs(i < j ? i : j, width, a, b, lcm, h1, h2, h3);
       }
+      */
       if (mpfr_cmp(delta_res, z3) < 0) {
 				fprintf(fpt, "%d,%d\n", i, j);
       }
