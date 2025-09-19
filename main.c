@@ -198,6 +198,12 @@ mpfr_t h1, mpfr_t h2, mpfr_t h3, mpfr_t h4, mpfr_t h5, mpfr_t delta_res, mpfr_t 
   mpfr_fill_seqs(1, width, a, b, lcm, h1, h2, h3);
 }
 
+int num_digits(int x) {
+  if (-10 < x && x < 10)
+    return 1;
+  return 1 + num_digits(x/10);
+}
+
 int mainloop(int width, int prec) {
   // MPFR variables storing the sequences in Apery's sequences
   // h's are helper variables, z3 stores Apery's constant
@@ -213,6 +219,7 @@ int mainloop(int width, int prec) {
     for (int j = i + 1; j <= width - 1; j++) {
       delta(delta_res, a[j], a[i], b[j], b[i], lcm[j], lcm[i], h1, h2, h3);
       // should be way to check file instead. this is proof of concept.
+      /*
       delta(h4, a[j], a[i-1], b[j], b[i-1], lcm[j], lcm[i-1], h1, h2, h3);
       delta(h5, a[j], a[i-1], b[j-1], b[i-1], lcm[j-1], lcm[i-1], h1, h2, h3);
       if (mpfr_cmp(h4, z3) >= 0 && mpfr_cmp(h5,z3) >= 0) {
@@ -220,14 +227,15 @@ int mainloop(int width, int prec) {
         setup((i < j ? i : j) - 1, width, prec, a, b, lcm, h1, h2, h3, h4, h5, delta_res, z3, 0);
         j -= 1;
       }
-      else if (mpfr_equal_p(delta_res, z3)) {
+      else */if (mpfr_equal_p(delta_res, z3)) {
         prec *= 2;
         setup((i < j ? i : j) - 1, width, prec, a, b, lcm, h1, h2, h3, h4, h5, delta_res, z3, 0);
         j -= 1;
         //checks also if there is a point to the immediate left, or left-and-down-one
       }
       else if (mpfr_cmp(delta_res, z3) < 0) {
-				fprintf(fpt, "%d,%d\n", i, j);
+        const int pad = 2 * num_digits(width) + 1 - num_digits(i) - num_digits(j);
+				fprintf(fpt, "%*.*s%d,%d\n", 0, pad, "000000", i, j);
       }
     }
   }
