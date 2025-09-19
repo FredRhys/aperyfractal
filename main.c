@@ -235,7 +235,7 @@ int mainloop(int width, int prec) {
       }
       else if (mpfr_cmp(delta_res, z3) < 0) {
         const int pad = 2 * num_digits(width) + 1 - num_digits(i) - num_digits(j);
-				fprintf(fpt, "%*.*s%d,%d\n", 0, pad, "000000", i, j);
+				fprintf(fpt, "%*.*s%d,%d\n", 0, pad, "00000000000000000000000000000", i, j);
       }
     }
   }
