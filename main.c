@@ -204,38 +204,55 @@ int num_digits(int x) {
   return 1 + num_digits(x/10);
 }
 
+void save_point(FILE *fpt, int linelen, int width, int i, int j) {
+  const int pad = linelen - num_digits(i) - num_digits(j);
+	fprintf(fpt, "%*.*s%d,%d\n", 0, pad, "00000000000000000000000000000", i, j);
+}
+
+int has_l_adj_p(FILE *fpt, int linelen, int x, int y) {
+  fseek(fpt, -linelen-2, SEEK_END);
+  char line[linelen+2];
+  fgets(line, linelen+2, fpt);
+  printf("%s\n", line);
+  fseek(fpt, 0, SEEK_END); //resets pointer
+  return 0;
+}
+
 int mainloop(int width, int prec) {
   // MPFR variables storing the sequences in Apery's sequences
   // h's are helper variables, z3 stores Apery's constant
   mpfr_t a[width], b[width], lcm[width], h1, h2, h3, h4, h5, delta_res, z3;
 
+  const int linelen = 2 * num_digits(width) + 1;
+  int vcounter = 0; // counts how many points are in the vertical line
+
   FILE *fpt;
-	fpt = fopen("output.csv", "w");
-	fprintf(fpt, "x,y\n");
+	fpt = fopen("output.csv", "w+");
+	fprintf(fpt, "%*.*sx,y\n", 0, linelen - 2, "00000000000000000000000000000");
   setup(0, width, prec, a, b, lcm, h1, h2, h3, h4, h5, delta_res, z3, 1);
+  
 
   // the mainloop
   for (int i = 0; i < width - 1; i++) {
     for (int j = i + 1; j <= width - 1; j++) {
       delta(delta_res, a[j], a[i], b[j], b[i], lcm[j], lcm[i], h1, h2, h3);
-      // should be way to check file instead. this is proof of concept.
-      /*
-      delta(h4, a[j], a[i-1], b[j], b[i-1], lcm[j], lcm[i-1], h1, h2, h3);
-      delta(h5, a[j], a[i-1], b[j-1], b[i-1], lcm[j-1], lcm[i-1], h1, h2, h3);
-      if (mpfr_cmp(h4, z3) >= 0 && mpfr_cmp(h5,z3) >= 0) {
+      if (mpfr_equal_p(delta_res, z3)) {
         prec *= 2;
         setup((i < j ? i : j) - 1, width, prec, a, b, lcm, h1, h2, h3, h4, h5, delta_res, z3, 0);
-        j -= 1;
-      }
-      else */if (mpfr_equal_p(delta_res, z3)) {
-        prec *= 2;
-        setup((i < j ? i : j) - 1, width, prec, a, b, lcm, h1, h2, h3, h4, h5, delta_res, z3, 0);
-        j -= 1;
+        j--;
         //checks also if there is a point to the immediate left, or left-and-down-one
       }
-      else if (mpfr_cmp(delta_res, z3) < 0) {
-        const int pad = 2 * num_digits(width) + 1 - num_digits(i) - num_digits(j);
-				fprintf(fpt, "%*.*s%d,%d\n", 0, pad, "00000000000000000000000000000", i, j);
+      if (mpfr_cmp(delta_res, z3) < 0) {
+        if (vcounter == 1) {
+          if (has_l_adj_p(fpt, linelen, i, j)) {
+            
+          }
+        }
+        save_point(fpt, linelen, width, i, j);
+        vcounter++;
+      }
+      else {
+        vcounter = 0;
       }
     }
   }
