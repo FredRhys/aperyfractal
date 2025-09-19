@@ -48,6 +48,24 @@ void apery_aux(mpfr_t rop, int n, int k, mpfr_t h1, mpfr_t h2, mpfr_t h3) {
   mpfr_add(rop, rop, h1, R);
 }
 
+void dir_a(mpfr_t rop, int n, mpfr_t h1, mpfr_t h2, mpfr_t h3, mpfr_t h4, mpfr_t h5) {
+  mpfr_set_zero(rop, 0);
+  for (int k = 0; k <= n; k++) {
+    binom_sum_sq(h1, n, k, h2);
+    apery_aux(h2, n, k, h3, h4, h5);
+    mpfr_mul(h1, h1, h2, R);
+    mpfr_add(rop, rop, h1, R);
+  }
+}
+
+void dir_b(mpfr_t rop, int n, mpfr_t h1, mpfr_t h2) {
+  mpfr_set_zero(rop, 0);
+  for (int k = 0; k <= n; k++) {
+    binom_sum_sq(h1, n, k, h2);
+    mpfr_add(rop, rop, h1, R);
+  }
+}
+
 int str_to_int(char *str) {
   return (int) strtol(str, 0, 10);
 }
@@ -141,7 +159,7 @@ void mpfr_set_initial_vals(int start, int width, mpfr_t a[width], mpfr_t b[width
 }
 
 void set_list_precs(int start, int width, int prec, mpfr_t a[width], mpfr_t b[width], mpfr_t lcm[width], 
-mpfr_t h1, mpfr_t h2, mpfr_t h3, mpfr_t delta_res, mpfr_t z3, int init) {
+mpfr_t h1, mpfr_t h2, mpfr_t h3, mpfr_t h4, mpfr_t h5, mpfr_t delta_res, mpfr_t z3, int init) {
   mpfr_init_lists(start, width, prec, a, b, lcm, init); //start only matters if init==1
   if (init) {
     mpfr_inits2(prec, h1, h2, h3, delta_res, z3, mpfr_null);
@@ -149,6 +167,8 @@ mpfr_t h1, mpfr_t h2, mpfr_t h3, mpfr_t delta_res, mpfr_t z3, int init) {
     mpfr_set_prec(h1, prec);
     mpfr_set_prec(h2, prec);
     mpfr_set_prec(h3, prec);
+    mpfr_set_prec(h4, prec);
+    mpfr_set_prec(h5, prec);
     mpfr_set_prec(delta_res, prec);
     mpfr_set_prec(z3, prec);
   }
@@ -166,14 +186,14 @@ void mpfr_fill_seqs(int start, int width, mpfr_t a[width], mpfr_t b[width], mpfr
 int mainloop(int width, int prec) {
   // MPFR variables storing the sequences in Apery's sequences
   // h's are helper variable, z3 stores Apery's constant
-  mpfr_t a[width], b[width], lcm[width], h1, h2, h3, delta_res, z3;
+  mpfr_t a[width], b[width], lcm[width], h1, h2, h3, h4, h5, delta_res, z3;
 
   FILE *fpt;
 	fpt = fopen("output.csv", "w");
 	fprintf(fpt, "x,y\n");
 
   // Initialize all the above with `prec` bits of precision
-  set_list_precs(0, width, prec, a, b, lcm, h1, h2, h3, delta_res, z3, 1);
+  set_list_precs(0, width, prec, a, b, lcm, h1, h2, h3, h4, h5, delta_res, z3, 1);
 
   // set the initial values for the sequences
   mpfr_set_initial_vals(0, width, a, b, lcm);
@@ -188,7 +208,7 @@ int mainloop(int width, int prec) {
       delta(delta_res, a[j], a[i], b[j], b[i], lcm[j], lcm[i], h1, h2, h3);
       if (mpfr_cmp(delta_res, z3) == 0) {
         prec = prec * 2;
-        set_list_precs(i < j ? i : j, width, prec, a, b, lcm, h1, h2, h3, delta_res, z3, 1);
+        set_list_precs(i < j ? i : j, width, prec, a, b, lcm, h1, h2, h3, h4, h5, delta_res, z3, 1);
         mpfr_set_initial_vals(i < j ? i : j, width, a, b, lcm);
         mpfr_zeta_ui(z3, 3, R);
         mpfr_fill_seqs(i < j ? i : j, width, a, b, lcm, h1, h2, h3);
@@ -201,7 +221,7 @@ int mainloop(int width, int prec) {
 
   //clear the memory used by MPFR
   mpfr_clear_lists(width, a, b, lcm);
-  mpfr_clears(h1, h2, h3, delta_res, z3, mpfr_null);
+  mpfr_clears(h1, h2, h3, h4, h5, delta_res, z3, mpfr_null);
   mpfr_free_cache();
   fclose(fpt);
   return 0;
