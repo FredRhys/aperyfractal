@@ -36,7 +36,7 @@ void apery_aux(mpfr_t rop, int n, int k, mpfr_t h1, mpfr_t h2, mpfr_t h3) {
     mpfr_set_si(h1, l, R);
     mpfr_pow_si(h1, h1, -3, R);
     mpfr_add(rop, rop, h1, R);
-  } //1
+  }
   mpfr_set_zero(h1, 0);
   for (int m = 1; m <= k; m++) {
     mpfr_set_si(h1, m % 2 == 0 ? -1 : 1, R);
