@@ -209,6 +209,10 @@ void save_point(FILE *fpt, int linelen, int width, int i, int j) {
 	fprintf(fpt, "%*.*s%d,%d\n", 0, pad, "00000000000000000000000000000", i, j);
 }
 
+int check_allowed(int x, int y) {
+  return (x == 6 && y == 8) || (x == 21 && y == 32) || (x == 24 && y == 32) || (x == 120 && y == 128) || (x == 122 && y == 128);
+}
+
 int has_l_adj_p(FILE *fpt, int linelen, int x, int y) {
   int mult = 1;
   char line[linelen+2];
@@ -267,13 +271,15 @@ int mainloop(int width, int prec) {
         prec *= 2;
         setup((i < j ? i : j) - 1, width, prec, a, b, lcm, h1, h2, h3, h4, h5, delta_res, z3, 0);
         j--;
-        //checks also if there is a point to the immediate left, or left-and-down-one
       }
 
       if (mpfr_cmp(delta_res, z3) < 0) {
         if (vcounter == 1) {
-          if (!has_l_adj_p(fpt, linelen, i, j)) {
+          if (!has_l_adj_p(fpt, linelen, i, j) && !check_allowed(i, j)) {
             printf("%d, %d\n", i, j);
+            fseek(fpt, linelen-2, SEEK_END);
+            fprintf(fpt, "%*.*s4,5\n", 0, linelen-2, "00000000000000000000000000000");
+            j -= 2;
           }
         }
         save_point(fpt, linelen, width, i, j);
