@@ -273,7 +273,6 @@ int mainloop(int width, int prec) {
       if (mpfr_cmp(delta_res, z3) < 0) {
         if (vcounter == 1) {
           if (!has_l_adj_p(fpt, linelen, i, j) && !check_allowed(i, j)) {
-            printf("%d, %d\n", i, j);
             j -= 2;
             vcounter = 0;
             prec *= 2;
