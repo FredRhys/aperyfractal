@@ -276,9 +276,11 @@ int mainloop(int width, int prec) {
         if (vcounter == 1) {
           if (!has_l_adj_p(fpt, linelen, i, j) && !check_allowed(i, j)) {
             printf("%d, %d\n", i, j);
-            fseek(fpt, linelen-2, SEEK_END);
-            fprintf(fpt, "%*.*s4,5\n", 0, linelen-2, "00000000000000000000000000000");
+            //fseek(fpt, linelen-2, SEEK_END);
             j -= 2;
+            vcounter = 0;
+            prec *= 2;
+            setup((i < j ? i : j) - 1, width, prec, a, b, lcm, h1, h2, h3, h4, h5, delta_res, z3, 0);
           }
         }
         save_point(fpt, linelen, width, i, j);
