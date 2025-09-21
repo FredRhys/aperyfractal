@@ -259,9 +259,7 @@ int mainloop(int width, int prec) {
 	fpt = fopen("output.csv", "w+");
 	fprintf(fpt, "x,y\n");
   setup(0, width, prec, a, b, lcm, h1, h2, h3, h4, h5, delta_res, z3, 1);
-  
-
-  // the mainloop
+  // the mainloop proper
   for (int i = 0; i < width - 1; i++) {
     vcounter = 0;
     for (int j = i + 1; j <= width - 1; j++) {
@@ -276,7 +274,6 @@ int mainloop(int width, int prec) {
         if (vcounter == 1) {
           if (!has_l_adj_p(fpt, linelen, i, j) && !check_allowed(i, j)) {
             printf("%d, %d\n", i, j);
-            //fseek(fpt, linelen-2, SEEK_END);
             j -= 2;
             vcounter = 0;
             prec *= 2;
