@@ -140,7 +140,6 @@ void mpfr_lcm(int n, mpfr_t lcm2, mpfr_t lcm1, mpfr_t h1, mpfr_t h2, mpfr_t h3) 
 }
 
 void mpfr_set_initial_vals(int start, int width, mpfr_t a[width], mpfr_t b[width], mpfr_t lcm[width], mpfr_t h1, mpfr_t h2, mpfr_t h3, mpfr_t h4, mpfr_t h5) {
-  // based off previous calculations
   dir_a(a[start], start, h1, h2, h3, h4, h5);
   dir_a(a[start + 1], start + 1, h1, h2, h3, h4, h5);
   dir_b(b[start], start, h1, h2);
