@@ -260,27 +260,28 @@ int mainloop(int width, int prec) {
 	fprintf(fpt, "x,y\n");
   setup(0, width, prec, a, b, lcm, h1, h2, h3, h4, h5, delta_res, z3, 1);
   // the mainloop proper
-  for (int i = 0; i < width - 1; i++) {
+  for (int j = 0; j < width - 1; j++) {
     vcounter = 0;
-    for (int j = i + 1; j <= width - 1; j++) {
+    for (int i = 1; i <= j; i++) {
       delta(delta_res, a[j], a[i], b[j], b[i], lcm[j], lcm[i], h1, h2, h3);
       if (mpfr_equal_p(delta_res, z3)) {
         prec *= 2;
-        setup((i < j ? i : j) - 1, width, prec, a, b, lcm, h1, h2, h3, h4, h5, delta_res, z3, 0);
+        setup(i - 1, width, prec, a, b, lcm, h1, h2, h3, h4, h5, delta_res, z3, 0);
         j--;
       }
 
       if (mpfr_cmp(delta_res, z3) < 0) {
         if (vcounter == 1) {
+          /*
           if (!has_l_adj_p(fpt, linelen, i, j) && !check_allowed(i, j)) {
             j -= 2;
             vcounter = 0;
             prec *= 2;
-            setup((i < j ? i : j) - 1, width, prec, a, b, lcm, h1, h2, h3, h4, h5, delta_res, z3, 0);
-          }
+            setup(i - 1, width, prec, a, b, lcm, h1, h2, h3, h4, h5, delta_res, z3, 0);
+          } */
         }
-        save_point(fpt, linelen, width, i, j);
         vcounter++;
+        save_point(fpt, linelen, width, i, j);
       }
       else {
         vcounter = 0;
