@@ -255,8 +255,9 @@ int mainloop(int width, int prec) {
 
   const int linelen = 2 * num_digits(width) + 1;
   int numblank = 0;
-  int line_has_pnt = 0;
+  int line_pnts = 0;
   const int NUMBLANK_LIM = 30;
+  const int OG_PREC = prec;
 
   FILE *fpt;
 	fpt = fopen("output.csv", "w+");
@@ -264,20 +265,28 @@ int mainloop(int width, int prec) {
   setup(0, width, prec, a, b, lcm, h1, h2, h3, h4, h5, delta_res, z3, 1);
   // the mainloop proper
   for (int j = 0; j < width; j++) {
-    line_has_pnt = 0;
+    line_pnts = 0;
     for (int i = 1; i < j; i++) {
       if (numblank == NUMBLANK_LIM) {
         numblank = 0;
         j -= NUMBLANK_LIM;
         i = 0;
-        prec *= 2;
+        prec += OG_PREC;
         printf("%d,%d: increasing precision to %d bits\n", i, j, prec);
         setup(0, width, prec, a, b, lcm, h1, h2, h3, h4, h5, delta_res, z3, 0);
+      }
+      else if (5 <= line_pnts && line_pnts == j - 2) {
+        j--;
+        i = 0;
+        prec += OG_PREC;
+        printf("%d,%d: increasing precision to %d bits\n", i, j, prec);
+        setup(0, width, prec, a, b, lcm, h1, h2, h3, h4, h5, delta_res, z3, 0);
+      
       }
       else {
         delta(delta_res, a[j], a[i], b[j], b[i], lcm[j], lcm[i], h1, h2, h3);
         if (mpfr_equal_p(delta_res, z3)) {
-          prec *= 2;
+          prec += OG_PREC;
           printf("%d,%d: increasing precision to %d bits\n", i, j, prec);
           setup(i - 1, width, prec, a, b, lcm, h1, h2, h3, h4, h5, delta_res, z3, 0);
           i--;
@@ -285,11 +294,11 @@ int mainloop(int width, int prec) {
         else if (mpfr_cmp(delta_res, z3) < 0) {
           save_point(fpt, linelen, width, i, j);
           numblank = 0;
-          line_has_pnt = 1;
+          line_pnts++;
         }
       }
     }
-    if (!line_has_pnt) {
+    if (!line_pnts) {
       numblank++;
     }
   }
