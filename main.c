@@ -212,6 +212,7 @@ int check_allowed(int x, int y) {
   return (x == 6 && y == 8) || (x == 21 && y == 32) || (x == 24 && y == 32) || (x == 120 && y == 128) || (x == 122 && y == 128);
 }
 
+// doesn't work with new traversal order.
 int has_l_adj_p(FILE *fpt, int linelen, int x, int y) {
   int mult = 1;
   char line[linelen+2];
