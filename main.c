@@ -204,7 +204,7 @@ int num_digits(int x) {
 }
 
 void save_point(FILE *fpt, int linelen, int width, int i, int j) {
-  const int pad = linelen - num_digits(i) - num_digits(j);
+  const int pad = linelen - num_digits(i) - num_digits(j) - 1;
 	fprintf(fpt, "%*.*s%d,%d\n", 0, pad, "00000000000000000000000000000", i, j);
 }
 
