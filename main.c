@@ -254,39 +254,43 @@ int mainloop(int width, int prec) {
   mpfr_t a[width], b[width], lcm[width], h1, h2, h3, h4, h5, delta_res, z3;
 
   const int linelen = 2 * num_digits(width) + 1;
-  int vcounter = 0; // counts how many points are in the vertical line
+  int numblank = 0;
+  int line_has_pnt = 0;
+  const int NUMBLANK_LIM = 30;
 
   FILE *fpt;
 	fpt = fopen("output.csv", "w+");
 	fprintf(fpt, "x,y\n");
   setup(0, width, prec, a, b, lcm, h1, h2, h3, h4, h5, delta_res, z3, 1);
   // the mainloop proper
-  for (int j = 0; j < width - 1; j++) {
-    vcounter = 0;
-    for (int i = 1; i <= j; i++) {
-      delta(delta_res, a[j], a[i], b[j], b[i], lcm[j], lcm[i], h1, h2, h3);
-      if (mpfr_equal_p(delta_res, z3)) {
+  for (int j = 0; j < width; j++) {
+    line_has_pnt = 0;
+    for (int i = 1; i < j; i++) {
+      if (numblank == NUMBLANK_LIM) {
+        numblank = 0;
+        j -= NUMBLANK_LIM;
+        i = 0;
         prec *= 2;
-        setup(i - 1, width, prec, a, b, lcm, h1, h2, h3, h4, h5, delta_res, z3, 0);
-        j--;
-      }
-
-      if (mpfr_cmp(delta_res, z3) < 0) {
-        if (vcounter == 1) {
-          /*
-          if (!has_l_adj_p(fpt, linelen, i, j) && !check_allowed(i, j)) {
-            j -= 2;
-            vcounter = 0;
-            prec *= 2;
-            setup(i - 1, width, prec, a, b, lcm, h1, h2, h3, h4, h5, delta_res, z3, 0);
-          } */
-        }
-        vcounter++;
-        save_point(fpt, linelen, width, i, j);
+        printf("%d,%d: increasing precision to %d bits\n", i, j, prec);
+        setup(0, width, prec, a, b, lcm, h1, h2, h3, h4, h5, delta_res, z3, 0);
       }
       else {
-        vcounter = 0;
+        delta(delta_res, a[j], a[i], b[j], b[i], lcm[j], lcm[i], h1, h2, h3);
+        if (mpfr_equal_p(delta_res, z3)) {
+          prec *= 2;
+          printf("%d,%d: increasing precision to %d bits\n", i, j, prec);
+          setup(i - 1, width, prec, a, b, lcm, h1, h2, h3, h4, h5, delta_res, z3, 0);
+          i--;
+        }
+        else if (mpfr_cmp(delta_res, z3) < 0) {
+          save_point(fpt, linelen, width, i, j);
+          numblank = 0;
+          line_has_pnt = 1;
+        }
       }
+    }
+    if (!line_has_pnt) {
+      numblank++;
     }
   }
 
