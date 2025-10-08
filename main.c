@@ -9,6 +9,51 @@
 // used as null pointer by the program; used to terminate lists of MPFR variables in variadic functions
 #define mpfr_null (mpfr_ptr) 0
 
+struct _234node {
+  // (x1-4,y-4) are my values. n is the number of values in me.
+  int x1, y1, x2, y2, x3, y3, n;
+  // c1-4 are my children. p is my parent.
+  struct _234node *c1, *c2, *c3, *c4, *p;
+};
+
+void _234insert(struct _234node **head, int x1, int y1) {
+  if ((*head)->n == 4) {
+    if ((*head)->p == NULL) {
+      struct _234node *new_head = malloc(sizeof(struct _234node));
+      struct _234node *new_left = malloc(sizeof(struct _234node));
+      struct _234node *new_right = malloc(sizeof(struct _234node));
+      new_head->x1 = (*head)->x2;
+      new_head->y1 = (*head)->y2;
+      new_head->c1 = new_left;
+      new_head->c2 = new_right;
+      new_head->p = NULL;
+      new_head->n = 1;
+    
+      new_left->x1 = (*head)->x1;
+      new_left->y1 = (*head)->y1;
+      new_left->c1 = (*head)->c1;
+      new_left->c2 = (*head)->c2;
+      new_left->p = new_head;
+      new_left->n = 1;
+
+      new_right->x1 = (*head)->x3;
+      new_right->y1 = (*head)->y3;
+      new_right->c1 = (*head)->c3;
+      new_right->c2 = (*head)->c4;
+      new_right->p = new_head;
+      new_right->n = 1;
+
+    free(*head);
+    *head = new_head;
+    }
+    else {
+      _234insert((*head)->p, (*head)->x2, (*head)->y2);
+    }
+  }
+  //we are now ready to search for an insertion spot.
+
+}
+
 void nCr(mpfr_t rop, int n, int r) {
   const int k = r < n - r ? n - r + 1 : r + 1;
   mpfr_set_si(rop, 1, R);
