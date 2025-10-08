@@ -14,7 +14,8 @@
 void nCr(mpfr_t rop, int n, int r) {
   const int k = r < n - r ? n - r + 1 : r + 1;
   mpfr_set_si(rop, 1, R);
-  for (int i = n; i >= k; i--) {
+  register int i;
+  for (i = n; i >= k; --i) {
     mpfr_mul_si(rop, rop, i, R);
     mpfr_div_si(rop, rop, i - n + 1, R);
   }
@@ -34,13 +35,15 @@ void binom_sum_sq(mpfr_t rop, int n, int m, mpfr_t h) {
 void apery_aux(mpfr_t rop, int n, int k, mpfr_t h1, mpfr_t h2, mpfr_t h3) {
   mpfr_set_zero(rop, 0);
   mpfr_set_zero(h1, 0);
-  for (int l = 1; l <= n; l++) {
+  register int l = 1;
+  for (l = 1; l <= n; ++l) {
     mpfr_set_si(h1, l, R);
     mpfr_pow_si(h1, h1, -3, R);
     mpfr_add(rop, rop, h1, R);
   }
   mpfr_set_zero(h1, 0);
-  for (int m = 1; m <= k; m++) {
+  register int m = 1;
+  for (m = 1; m <= k; ++m) {
     mpfr_set_si(h1, m % 2 == 0 ? -1 : 1, R);
     binom_sum(h2, n, m, h3);
     mpfr_set_si(h3, m, R);
@@ -54,7 +57,8 @@ void apery_aux(mpfr_t rop, int n, int k, mpfr_t h1, mpfr_t h2, mpfr_t h3) {
 
 void dir_a(mpfr_t rop, int n, mpfr_t h1, mpfr_t h2, mpfr_t h3, mpfr_t h4, mpfr_t h5) {
   mpfr_set_zero(rop, 0);
-  for (int k = 0; k <= n; k++) {
+  register int k = 0;
+  for (k = 0; k <= n; ++k) {
     binom_sum_sq(h1, n, k, h2);
     apery_aux(h2, n, k, h3, h4, h5);
     mpfr_mul(h1, h1, h2, R);
@@ -64,7 +68,8 @@ void dir_a(mpfr_t rop, int n, mpfr_t h1, mpfr_t h2, mpfr_t h3, mpfr_t h4, mpfr_t
 
 void dir_b(mpfr_t rop, int n, mpfr_t h1, mpfr_t h2) {
   mpfr_set_zero(rop, 0);
-  for (int k = 0; k <= n; k++) {
+  register int k = 0;
+  for (k = 0; k <= n; ++k) {
     binom_sum_sq(h1, n, k, h2);
     mpfr_add(rop, rop, h1, R);
   }
