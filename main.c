@@ -270,12 +270,13 @@ int mainloop(int width, int prec) {
     vcounter = 0;
     for (j = i + 1; j <= width - 1; ++j) {
       delta(delta_res, a[j], a[i], b[j], b[i], lcm[j], lcm[i], h1, h2, h3);
+      /*
       if (mpfr_equal_p(delta_res, z3)) {
         prec *= 2;
         setup((i < j ? i : j) - 1, width, prec, a, b, lcm, h1, h2, h3, h4, h5, delta_res, z3, 0);
         j--;
       }
-
+      */
       if (mpfr_cmp(delta_res, z3) < 0) {
         save_point(fpt, linelen, i, j);
         /*
