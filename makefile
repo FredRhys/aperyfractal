@@ -5,7 +5,8 @@ CFLAGS = -std=c11\
 		 -Wall\
 		 -pedantic\
 		 -fsanitize=undefined\
-		 -fsanitize=address
+		 -fsanitize=address\
+		 -O2
 
 .PHONY: main
 main:

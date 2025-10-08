@@ -2,6 +2,8 @@
 #include <mpfr.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <fcntl.h>
+#include <unistd.h>
 #include <math.h>
 
 // the rounding type used by this program; used when initializing MPFR variables
@@ -107,6 +109,12 @@ void mpfr_fill_seqs(int width, mpfr_t a[width], mpfr_t b[width], mpfr_t lcm[widt
   }
 }
 
+int num_digits(int x) {
+  if (-10 < x && x < 10)
+    return 1;
+  return 1 + num_digits(x/10);
+}
+
 int mainloop(int width, int prec) {
   // MPFR variables storing the sequences in Apery's sequences
   // h's are helper variable, z3 stores Apery's constant
@@ -114,7 +122,8 @@ int mainloop(int width, int prec) {
 
   FILE *fpt;
 	fpt = fopen("output.csv", "w");
-	fprintf(fpt, "x,y\n");
+  fprintf(fpt, "x,y\n");
+  const int LEN = 2 * num_digits(width) + 1;
 
   // Initialize all the above with `prec` bits of precision
   mpfr_init_lists(width, prec, a, b, lcm);
@@ -134,7 +143,7 @@ int mainloop(int width, int prec) {
     for (j = i+1; j <= width - 1; ++j) {   
       delta(delta_res, a[j], a[i], b[j], b[i], lcm[j], lcm[i], h1, h2, h3);
       if (mpfr_cmp(delta_res, z3) < 0) {
-				fprintf(fpt, "%d,%d\n", i, j);
+        fprintf(fpt, "%*.*s%d,%d\n", 0, LEN - num_digits(i) - num_digits(j), "0000000000000000000000", i, j);
       }
     }
   }
