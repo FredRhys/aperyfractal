@@ -2,8 +2,6 @@
 #include <mpfr.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <fcntl.h>
-#include <unistd.h>
 #include <math.h>
 
 // the rounding type used by this program; used when initializing MPFR variables
@@ -262,7 +260,9 @@ int mainloop(int width, int prec) {
   mpfr_t a[width], b[width], lcm[width], h1, h2, h3, h4, h5, delta_res, z3;
 
   const int linelen = 2 * num_digits(width) + 1;
+  #ifdef DYNPREC
   int vcounter = 0; // counts how many points are in the vertical line
+  #endif
 
   FILE *fpt;
 	fpt = fopen("output.csv", "w+");
@@ -272,15 +272,20 @@ int mainloop(int width, int prec) {
   register int i;
   register int j;
   for (i = 0; i < width - 1; ++i) {
+    #ifdef DYNPREC
     vcounter = 0;
+    #endif
     for (j = i + 1; j <= width - 1; ++j) {
       delta(delta_res, a[j], a[i], b[j], b[i], lcm[j], lcm[i], h1, h2, h3);
+      #ifdef DYNPREC
       if (mpfr_equal_p(delta_res, z3)) {
         prec *= 2;
         setup((i < j ? i : j) - 1, width, prec, a, b, lcm, h1, h2, h3, h4, h5, delta_res, z3, 0);
         j--;
       }
+      #endif
       if (mpfr_cmp(delta_res, z3) < 0) {
+        #ifdef DYNPREC
         if (vcounter == 1) {
           if (!has_l_adj_p(fpt, linelen, i, j) && !check_allowed(i, j)) {
             j -= 2;
@@ -289,12 +294,15 @@ int mainloop(int width, int prec) {
             setup((i < j ? i : j) - 1, width, prec, a, b, lcm, h1, h2, h3, h4, h5, delta_res, z3, 0);
           }
         }
-        save_point(fpt, linelen, i, j);
         vcounter++;
+        #endif
+        save_point(fpt, linelen, i, j);
       }
+      #ifdef DYNPREC
       else {
         vcounter = 0;
       }
+      #endif
     }
   }
 

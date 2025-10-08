@@ -12,6 +12,10 @@ CFLAGS = -std=c11\
 main:
 	$(LD) $(CFLAGS) -o main main.c -lmpfr -lgmp -lm
 
+.PHONY: dyn
+dyn:
+	$(LD) $(CFLAGS) -o main main.c -lmpfr -lgmp -lm -DDYNPREC
+
 .PHONY: mpfr_version
 mpfr_version:
 	$(LD) $(CFLAGS) -o mpfr_version mpfr_version.c -lmpfr -lgmp
