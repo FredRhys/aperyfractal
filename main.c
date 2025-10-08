@@ -14,13 +14,15 @@ int str_to_int(char *str) {
 }
 
 void mpfr_init_lists(int width, int prec, mpfr_t a[width], mpfr_t b[width], mpfr_t lcm[width]) {
-  for (int i = 0; i < width; i++) {
+  register int i;
+  for (i = 0; i < width; ++i) {
     mpfr_inits2(prec, a[i], b[i], lcm[i], mpfr_null);
   }
 }
 
 void mpfr_clear_lists(int width, mpfr_t a[width], mpfr_t b[width], mpfr_t lcm[width]) {
-  for (int i = 0; i < width; i++) {
+  register int i;
+  for (i = 0; i < width; ++i) {
     mpfr_clears(a[i], b[i], lcm[i], mpfr_null);
   }
 }
@@ -64,7 +66,7 @@ void mpfr_rec(int n, mpfr_t u2, mpfr_t u1, mpfr_t u0, mpfr_t h1, mpfr_t h2) {
   mpfr_mul(h1, u0, h2, R);
   mpfr_sub(u2, u2, h1, R);
 
-  mpfr_set_si(h2, n+1, R);
+  mpfr_set_si(h2, n + 1, R);
   mpfr_pow_si(h2, h2, 3, R);
   mpfr_div(u2, u2, h2, R);
 }
@@ -97,7 +99,8 @@ void mpfr_set_initial_vals(int width, mpfr_t a[width], mpfr_t b[width], mpfr_t l
 
 void mpfr_fill_seqs(int width, mpfr_t a[width], mpfr_t b[width], mpfr_t lcm[width],
   mpfr_t h1, mpfr_t h2, mpfr_t h3) {
-  for (int i = 1; i < width - 1; i++) {
+  register int i;
+  for (i = 1; i < width - 1; ++i) {
     mpfr_rec(i, a[i+1], a[i], a[i-1], h1, h2);
     mpfr_rec(i, b[i+1], b[i], b[i-1], h1, h2);
     mpfr_lcm(i, lcm[i+1], lcm[i], h1, h2, h3);
@@ -125,8 +128,10 @@ int mainloop(int width, int prec) {
   mpfr_fill_seqs(width, a, b, lcm, h1, h2, h3);
 
   // the mainloop
-  for (int i = 0; i < width - 1; i++) {
-    for (int j = i+1; j <= width -1; j++) {   
+  register int i;
+  register int j;
+  for (i = 0; i < width - 1; ++i) {
+    for (j = i+1; j <= width - 1; ++j) {   
       delta(delta_res, a[j], a[i], b[j], b[i], lcm[j], lcm[i], h1, h2, h3);
       if (mpfr_cmp(delta_res, z3) < 0) {
 				fprintf(fpt, "%d,%d\n", i, j);
